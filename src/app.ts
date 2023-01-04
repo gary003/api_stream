@@ -16,6 +16,7 @@ const fakeUpload = (req: any, res: any, next: () => void) => {
   }
 
   req.sourceData = stream.Readable.from(fakeSource())
+  // req.sourceData = stream.Readable.from("sourceString".split(""))
 
   next()
 }
@@ -24,15 +25,17 @@ app.get("/file", fakeUpload, async (req: any, res) => {
   // console.log(req.sourceData)
 
   const transform = async function* (source: any) {
-    for await (const value of source) {
+    for await (const value of source.sourceData) {
+      console.log(`chunk: ${value}`)
       yield `${value},`
     }
   }
 
   try {
-    return await pipelineAsync(req.sourceData, transform, res.status(250))
-  } catch (e) {
-    const errorPipeline = new Error("Error in pipeline")
+    await pipelineAsync(req, transform, res.status(250))
+    console.log("pipeline ended")
+    return true
+  } catch (errorPipeline) {
     console.error(errorPipeline)
     return res.status(500).send(errorPipeline)
   }
