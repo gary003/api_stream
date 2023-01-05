@@ -1,6 +1,9 @@
 import express from "express"
 import stream from "stream"
 import { promisify } from "util"
+import fs from "fs-extra"
+
+const port = 8080
 
 // Defining pipelineAsync method
 const pipelineAsync = promisify(stream.pipeline)
@@ -9,14 +12,15 @@ const app = express()
 
 const fakeUpload = (req: any, res: any, next: () => void) => {
   const fakeSource = function* () {
-    yield "azerty"
-    yield "qwerty"
-    yield "poiuyt"
-    yield "wxcvbn"
+    yield JSON.stringify({ name: "azerty" })
+    yield JSON.stringify({ name: "qwerty" })
+    yield JSON.stringify({ name: "poiuyt" })
+    yield JSON.stringify({ name: "wxcvbn" })
   }
 
   req.sourceData = stream.Readable.from(fakeSource())
   // req.sourceData = stream.Readable.from("sourceString".split(""))
+  // req.sourceData = fs.createReadStream("./src/files/testFile.txt", { highWaterMark: 8 })
 
   next()
 }
@@ -27,7 +31,7 @@ app.get("/file", fakeUpload, async (req: any, res) => {
   const transform = async function* (source: any) {
     for await (const value of source.sourceData) {
       console.log(`chunk: ${value}`)
-      yield `${value},`
+      yield `chunk: \n${value}\n`
     }
   }
 
@@ -41,4 +45,4 @@ app.get("/file", fakeUpload, async (req: any, res) => {
   }
 })
 
-app.listen(8888, () => console.log("Listening on 8888"))
+app.listen(port, () => console.log(`Listening on : ${port}`))
