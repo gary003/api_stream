@@ -12,17 +12,17 @@ const app = express()
 
 const fakeUpload = (req: any, res: any, next: () => void) => {
   const fakeSource = function* () {
-    yield JSON.stringify({ name: "azerty" })
-    yield JSON.stringify({ name: "qwerty" })
-    yield JSON.stringify({ name: "poiuyt" })
-    yield JSON.stringify({ name: "wxcvbn" })
+    yield { name: "azerty" }
+    yield { name: "qwerty" }
+    yield { name: "poiuyt" }
+    yield { name: "wxcvbn" }
   }
 
   req.sourceData = stream.Readable.from(fakeSource())
   // req.sourceData = stream.Readable.from("sourceString".split(""))
   // req.sourceData = fs.createReadStream("./src/files/testFile.txt", { highWaterMark: 8 })
 
-  next()
+  return next()
 }
 
 app.get("/file", fakeUpload, async (req: any, res) => {
@@ -31,7 +31,7 @@ app.get("/file", fakeUpload, async (req: any, res) => {
   const transform = async function* (source: any) {
     for await (const value of source.sourceData) {
       console.log(`chunk: ${value}`)
-      yield `chunk: \n${value}\n`
+      yield JSON.stringify(value)
     }
   }
 
