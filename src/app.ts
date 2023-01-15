@@ -20,7 +20,7 @@ const fakeUpload = (req: any, res: any, next: () => void) => {
 
   req.sourceData = stream.Readable.from(fakeSource())
   // req.sourceData = stream.Readable.from("sourceString".split(""))
-  // req.sourceData = fs.createReadStream("./src/files/testFile.txt", { highWaterMark: 8 })
+  // req.sourceData = fs.createReadStream("./src/files/testFile.txt", { encoding: "utf-8", highWaterMark: 8 })
 
   return next()
 }
